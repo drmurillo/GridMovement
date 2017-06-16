@@ -1,0 +1,86 @@
+var img;
+
+var counter;
+
+var col;
+var row;
+
+var frameWidth;
+var frameHeight;
+//top left corner of the source image
+var x;
+var y;
+
+var currentFrame;
+var endFrame;
+var framesPerRow;
+var frameSpeed;
+
+function preload() {
+  img = loadImage('http://res.cloudinary.com/snugglepigs/image/upload/v1496338495/glowing_egg_sprite_lxhufg.png');
+
+}
+
+function setup() {
+  createCanvas(windowWidth, windowHeight);
+  currentFrame = 0;
+  frameWidth = 400;
+  frameHeight = 300;
+  endFrame = 16;
+  framesPerRow = floor(1600 / frameWidth);
+  //Higher value = slower speed.
+  //example: a value of 4 = 15 fps
+  frameSpeed = 8;
+  counter = 0;
+  x = width / 2;
+  y = height / 2;
+}
+
+function draw() {
+  background(51);
+  //currentFrame = (currentFrame + 1) % endFrame;
+  row = floor(currentFrame / framesPerRow);
+  col = floor(currentFrame % framesPerRow);
+  counter += 1;
+  if (counter > frameSpeed - 1) {
+    counter = 0;
+    if (currentFrame < endFrame - 1) {
+      currentFrame += 1;
+    } else if (currentFrame == endFrame - 1) {
+      currentFrame = 0;
+    }
+  }
+  image(img, x, y, frameWidth, frameHeight, row * frameWidth, col * frameHeight, frameWidth, frameHeight);
+}
+
+/*function loadSpriteSheet(path, frameWidth, frameHeight, frameSpeed, endFrame) {
+  this.img = loadImage(path);
+  this.framesPerRow;
+
+  this.currentFrame = 0;
+  this.counter = 0;
+
+  this.image.onload = function() {
+    //1600 magic number is the width of the image
+    this.framesPerRow = floor(1600 / frameWidth);
+  };
+
+  this.update = function() {
+    if (this.counter == (frameSpeed - 1)) {
+      this.currentFrame = (this.currentFrame + 1) % endFrame;
+    }
+    this.counter = (this.counter + 1) % frameSpeed;
+  };
+
+  this.draw = function(x, y) {
+    var row = floor(currentFrame / this.framesPerRow);
+    var col = floor(currentFrame % this.framesPerRow);
+    image(this.img,
+    col * frameWidth,
+    row * frameHeight,
+    frameWidth, frameHeight,
+    x, y,
+    frameWidth, frameHeight);
+  };
+}
+*/
