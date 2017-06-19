@@ -8,7 +8,7 @@ var mousePos;
 var route;
 
 function setup() {
-  createCanvas(400, 300);
+  createCanvas(1600, 900);
   //cols moves along the y axis
   cols = floor(height / gridSize);
   //rows moves along the x axis
@@ -39,13 +39,18 @@ function Route(mouseCell, playerCell) {
   this.end;
   this.openSet = [];
   this.closedSet = [];
-  this.path = [];
+  this.path;
 
   this.find = function() {
+    //Empty the path array
+    this.path = [];
+    //Initializing start and end
     this.start = playerCell;
     this.end = mouseCell;
     this.openSet.push(this.start);
-    while (this.openSet.length > 0) {
+    //begin A* Search
+    while (this.openSet.length > 0 && this.end != undefined) {
+      console.log('searching for best path');
       var winner = 0;
       for (i = 0; i < this.openSet.length; i++) {
         if (this.openSet[i].f < this.openSet[winner].f) {
@@ -57,11 +62,30 @@ function Route(mouseCell, playerCell) {
         var temp = current;
         this.path.push(temp);
         while (temp.previous) {
-          console.log('in path loop');
+          console.log('generating optimal path');
           this.path.push(temp.previous);
           temp = temp.previous;
         }
         this.path.reverse();
+        //Clearing the openSet's f, g and h values
+        for (i = 0; i < this.openSet.length; i++) {
+          this.openSet[i].f = 0;
+          this.openSet[i].g = 0;
+          this.openSet[i].h = 0;
+        }
+        //Clearing the closedSet's f, g and h values
+        for (i = 0; i < this.closedSet.length; i++) {
+          this.closedSet[i].f = 0;
+          this.closedSet[i].g = 0;
+          this.closedSet[i].h = 0;
+        }
+        //Clearing path's previous values
+        for (i = 0; i < this.path.length; i++) {
+          this.path[i].previous = undefined;
+        }
+        //clearing openSet and closedSet Arrays
+        this.openSet = [];
+        this.closedSet = [];
         console.log('DONE!');
         break;
       }
@@ -73,7 +97,7 @@ function Route(mouseCell, playerCell) {
       for (i = 0; i < neighbors.length; i++) {
         var neighbor = neighbors[i];
         if (!this.closedSet.includes(neighbor)) {
-            var tempG = current.g + 1;
+          var tempG = current.g + 1;
           if (this.openSet.includes(neighbor)) {
             if (tempG < neighbor.g) {
               neighbor.g = tempG;
@@ -93,9 +117,9 @@ function Route(mouseCell, playerCell) {
 
 function Heuristic(a, b) {
   //Eucledian Distance
-  var d = dist(a.x, a.y, b.x, b.y);
+  //var d = dist(a.x, a.y, b.x, b.y);
   //Taxi Cab distance
-  //var d = abs(a.x - b.x) + abs(a.y - b.y);
+  var d = abs(a.x - b.x) + abs(a.y - b.y);
   return d;
 }
 function Cell(x, y) {
@@ -128,8 +152,9 @@ function Cell(x, y) {
   this.show = function() {
     stroke(255);
     noFill();
-    text('x: ' + this.x, this.x * gridSize, this.y * gridSize + 10)
-    text('y: ' + this.y, this.x * gridSize, this.y * gridSize + 30);
+    //debugging tool to see the x/y of each Cell
+    //text('x: ' + this.x, this.x * gridSize, this.y * gridSize + 10);
+    //text('y: ' + this.y, this.x * gridSize, this.y * gridSize + 30);
     rect(this.x * gridSize, this.y * gridSize, gridSize, gridSize);
   };
 
@@ -174,10 +199,15 @@ function Player(landscape) {
   };
 
   this.move = function(path) {
-    //move along path
+    for (i = 0; i < path.length; i++) {
+      var pathXY = createVector(path[i].x * gridSize, path[i].y * gridSize);
+      var direction = pathXY.sub(this.pos);
+      this.pos.add(direction);
+    }
   };
 
   this.cellPosition = function() {
+    this.currentCell = undefined;
     for (x = 0; x < rows; x++) {
       for (y = 0; y < cols; y++) {
         if (this.pos.x == x * gridSize && this.pos.y == y * gridSize) {
@@ -199,10 +229,14 @@ function MousePosition(landscape) {
   };
 
   this.cellPosition = function() {
+    this.currentCell = undefined;
     for (x = 0; x < rows; x++) {
       for (y = 0; y < cols; y++) {
         var topleftX = x * gridSize;
         var topleftY = y * gridSize;
+        if (this.pos.x > width || this.pos.y > height) {
+          //meepmerp
+        }
         if (this.pos.x >= topleftX && this.pos.x <= topleftX + gridSize &&
             this.pos.y >= topleftY && this.pos.y <= topleftY + gridSize) {
           this.currentCell = landscape.grid[x][y];
@@ -219,3 +253,4 @@ function removeFromArray(array, element) {
     }
   }
 }
+
