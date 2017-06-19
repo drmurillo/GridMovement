@@ -9,7 +9,9 @@ var route;
 
 function setup() {
   createCanvas(400, 300);
+  //cols moves along the y axis
   cols = floor(height / gridSize);
+  //rows moves along the x axis
   rows = floor(width / gridSize);
   landscape = new Grid();
   player = new Player(landscape);
@@ -44,7 +46,6 @@ function Route(mouseCell, playerCell) {
     this.end = mouseCell;
     this.openSet.push(this.start);
     while (this.openSet.length > 0) {
-      console.log('in while loop');
       var winner = 0;
       for (i = 0; i < this.openSet.length; i++) {
         if (this.openSet[i].f < this.openSet[winner].f) {
@@ -52,23 +53,27 @@ function Route(mouseCell, playerCell) {
         }
       }
       var current = this.openSet[winner];
-      if (current == this.end) {
+      if (current === this.end) {
         var temp = current;
         this.path.push(temp);
         while (temp.previous) {
+          console.log('in path loop');
           this.path.push(temp.previous);
           temp = temp.previous;
         }
+        this.path.reverse();
         console.log('DONE!');
+        break;
       }
       removeFromArray(this.openSet, current);
       this.closedSet.push(current);
 
       var neighbors = current.neighbors;
+
       for (i = 0; i < neighbors.length; i++) {
         var neighbor = neighbors[i];
         if (!this.closedSet.includes(neighbor)) {
-          var tempG = current.g + 1;
+            var tempG = current.g + 1;
           if (this.openSet.includes(neighbor)) {
             if (tempG < neighbor.g) {
               neighbor.g = tempG;
@@ -106,13 +111,13 @@ function Cell(x, y) {
   this.addNeighbors = function(grid) {
     var x = this.x;
     var y = this.y;
-    if (x < cols - 1) {
+    if (x < rows - 1) {
       this.neighbors.push(grid[x + 1][y]);
     }
     if (x > 0) {
       this.neighbors.push(grid[x - 1][y]);
     }
-    if (y < rows - 1) {
+    if (y < cols - 1) {
       this.neighbors.push(grid[x][y + 1]);
     }
     if (y > 0) {
@@ -123,6 +128,8 @@ function Cell(x, y) {
   this.show = function() {
     stroke(255);
     noFill();
+    text('x: ' + this.x, this.x * gridSize, this.y * gridSize + 10)
+    text('y: ' + this.y, this.x * gridSize, this.y * gridSize + 30);
     rect(this.x * gridSize, this.y * gridSize, gridSize, gridSize);
   };
 
@@ -167,9 +174,7 @@ function Player(landscape) {
   };
 
   this.move = function(path) {
-    for (i = 0; i < path.length; i++) {
-      this.pos.add(path[i].x * gridSize, path[i].y * gridSize);
-    }
+    //move along path
   };
 
   this.cellPosition = function() {
